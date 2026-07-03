@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>老師後台｜閱讀心得寫作進度總覽</title>
+<style>
+  :root {
+    --primary: #2c5f8a;
+    --primary-light: #4a90c4;
+    --accent: #e8a020;
+    --success: #2d7a4f;
+    --success-light: #eaf5ee;
+    --danger: #c0392b;
+    --danger-light: #fdf0ef;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #2d3436;
+    --muted: #636e72;
+    --border: #dfe6e9;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #1a3d5c 100%);
+    color: white;
+    text-align: center;
+    padding: 28px 20px 24px;
+  }
+  header h1 { font-size: 1.5rem; margin-bottom: 4px; }
+  header p { opacity: 0.85; font-size: 0.9rem; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* ── 登入畫面 ── */
+  #gate {
+    max-width: 380px;
+    margin: 80px auto;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 32px;
+    text-align: center;
+  }
+  #gate h2 { font-size: 1.1rem; margin-bottom: 16px; color: var(--primary); }
+  #gate input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    font-family: inherit;
+  }
+  #gate .err { color: var(--danger); font-size: 0.85rem; margin-bottom: 10px; min-height: 1.2em; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--primary);
+    color: white;
+    font-family: inherit;
+  }
+  .btn:hover { background: #1a3d5c; }
+  .btn-outline { background: white; border: 1.5px solid var(--primary); color: var(--primary); }
+  .btn-outline:hover { background: #eef5fb; }
+
+  /* ── 總覽列 ── */
+  .summary-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    flex: 1;
+    min-width: 140px;
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 16px 20px;
+  }
+  .stat-card .num { font-size: 1.6rem; font-weight: 700; color: var(--primary); }
+  .stat-card .label { font-size: 0.82rem; color: var(--muted); }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .toolbar input, .toolbar select {
+    padding: 8px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.88rem;
+  }
+
+  /* ── 學生卡片列表 ── */
+  .student-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .student-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 20px;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .student-card:hover { transform: translateY(-2px); }
+  .student-card .name { font-weight: 700; font-size: 1.02rem; color: var(--text); }
+  .student-card .meta { font-size: 0.82rem; color: var(--muted); margin: 4px 0 10px; }
+  .progress-bar-bg { background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; margin-bottom: 6px; }
+  .progress-bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--primary-light), var(--primary)); transition: width 0.3s; }
+  .progress-bar-fill.done { background: linear-gradient(90deg, #4fae7a, var(--success)); }
+  .student-card .pct-label { font-size: 0.8rem; color: var(--muted); display: flex; justify-content: space-between; }
+  .student-card .updated { font-size: 0.76rem; color: var(--muted); margin-top: 8px; }
+  .badges { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .mini-badge { font-size: 0.72rem; padding: 2px 8px; border-radius: 20px; }
+  .mini-badge.pass { background: var(--success-light); color: var(--success); }
+  .mini-badge.fail { background: var(--danger-light); color: var(--danger); }
+
+  .empty-state { text-align: center; color: var(--muted); padding: 60px 20px; }
+
+  /* ── 詳細內容彈窗 ── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 16px;
+    overflow-y: auto;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal-box {
+    background: white;
+    border-radius: var(--radius);
+    max-width: 720px;
+    width: 100%;
+    padding: 28px;
+  }
+  .modal-box h2 { color: var(--primary); margin-bottom: 4px; }
+  .modal-box .modal-meta { color: var(--muted); font-size: 0.88rem; margin-bottom: 18px; }
+  .modal-section { margin-bottom: 18px; }
+  .modal-section h3 { font-size: 0.95rem; color: var(--primary); margin-bottom: 6px; }
+  .modal-section .body { white-space: pre-wrap; background: var(--bg); border-radius: 8px; padding: 12px 14px; font-size: 0.9rem; min-height: 40px; }
+  .modal-close { float: right; }
+
+  @media (max-width: 600px) {
+    .student-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🧑‍🏫 老師後台：全班閱讀心得進度</h1>
+  <p>即時查看學生草稿與完成度</p>
+</header>
+
+<div class="container">
+
+  <!-- 登入畫面 -->
+  <div id="gate">
+    <h2>🔒 請輸入密碼查看班級進度</h2>
+    <input type="password" id="keyInput" placeholder="請輸入 Apps Script 設定的密碼">
+    <div class="err" id="gateErr"></div>
+    <button class="btn" onclick="unlock()" style="width:100%;">登入</button>
+  </div>
+
+  <!-- 主內容（登入後顯示） -->
+  <div id="main" style="display:none;">
+    <div class="summary-row">
+      <div class="stat-card"><div class="num" id="statCount">0</div><div class="label">已提交人數</div></div>
+      <div class="stat-card"><div class="num" id="statAvg">0%</div><div class="label">平均完成度</div></div>
+      <div class="stat-card"><div class="num" id="statDone">0</div><div class="label">已達標人數（100%）</div></div>
+    </div>
+
+    <div class="toolbar">
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="searchBox" placeholder="搜尋姓名或班級…" oninput="renderList()">
+        <select id="sortSel" onchange="renderList()">
+          <option value="progress_desc">完成度：高→低</option>
+          <option value="progress_asc">完成度：低→高</option>
+          <option value="updated_desc">最近更新</option>
+          <option value="name">姓名排序</option>
+        </select>
+      </div>
+      <button class="btn btn-outline" onclick="loadData()">🔄 重新整理</button>
+    </div>
+
+    <div class="student-grid" id="studentGrid"></div>
+    <div class="empty-state" id="emptyState" style="display:none;">目前還沒有學生提交草稿。</div>
+  </div>
+</div>
+
+<!-- 詳細內容彈窗 -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal-box">
+    <button class="btn btn-outline modal-close" onclick="closeModal()">關閉 ✕</button>
+    <h2 id="modalName"></h2>
+    <div class="modal-meta" id="modalMeta"></div>
+    <div class="modal-section"><h3>一、圖書作者與內容簡介</h3><div class="body" id="modalIntro"></div></div>
+    <div class="modal-section"><h3>二、內容摘錄</h3><div class="body" id="modalExcerpt"></div></div>
+    <div class="modal-section"><h3>三、我的觀點</h3><div class="body" id="modalOpinion"></div></div>
+    <div class="modal-section"><h3>四、討論議題</h3><div class="body" id="modalTopics"></div></div>
+  </div>
+</div>
+
+<script>
+// 部署 Apps Script（見 apps-script/Code.gs）後，把網頁應用程式網址貼在這裡（需與 index.html 相同）
+const SYNC_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+let allData = [];
+
+function unlock() {
+  const key = document.getElementById('keyInput').value.trim();
+  if (!key) return;
+  localStorage.setItem('reading_report_teacher_key', key);
+  loadData();
+}
+
+function countChars(str) { return (str || '').replace(/\s/g, '').length; }
+
+async function loadData() {
+  const key = localStorage.getItem('reading_report_teacher_key');
+  if (!key) return;
+  if (!SYNC_URL || SYNC_URL.indexOf('PASTE_YOUR') === 0) {
+    document.getElementById('gateErr').textContent = '尚未設定 SYNC_URL，請先完成 Apps Script 部署設定。';
+    return;
+  }
+  try {
+    const res = await fetch(SYNC_URL + '?key=' + encodeURIComponent(key));
+    const data = await res.json();
+    if (data && data.error) {
+      document.getElementById('gateErr').textContent = '密碼錯誤，請重新輸入。';
+      localStorage.removeItem('reading_report_teacher_key');
+      document.getElementById('gate').style.display = 'block';
+      document.getElementById('main').style.display = 'none';
+      return;
+    }
+    allData = Array.isArray(data) ? data : [];
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    renderList();
+  } catch (e) {
+    document.getElementById('gateErr').textContent = '連線失敗，請確認網路連線或稍後再試。';
+  }
+}
+
+function renderList() {
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+  const sortBy = document.getElementById('sortSel').value;
+
+  let list = allData.filter(s =>
+    !q || (s['姓名'] || '').toLowerCase().includes(q) || (s['班級'] || '').toLowerCase().includes(q)
+  );
+
+  const pct = s => parseInt(s['完成度']) || 0;
+  const updatedTime = s => new Date(s['最後更新'] || 0).getTime();
+
+  if (sortBy === 'progress_desc') list.sort((a, b) => pct(b) - pct(a));
+  else if (sortBy === 'progress_asc') list.sort((a, b) => pct(a) - pct(b));
+  else if (sortBy === 'updated_desc') list.sort((a, b) => updatedTime(b) - updatedTime(a));
+  else if (sortBy === 'name') list.sort((a, b) => (a['姓名'] || '').localeCompare(b['姓名'] || '', 'zh-Hant'));
+
+  // 統計
+  document.getElementById('statCount').textContent = allData.length;
+  const avg = allData.length ? Math.round(allData.reduce((s, x) => s + pct(x), 0) / allData.length) : 0;
+  document.getElementById('statAvg').textContent = avg + '%';
+  document.getElementById('statDone').textContent = allData.filter(x => pct(x) >= 100).length;
+
+  const grid = document.getElementById('studentGrid');
+  grid.innerHTML = '';
+  document.getElementById('emptyState').style.display = list.length ? 'none' : 'block';
+
+  list.forEach(s => {
+    const p = pct(s);
+    const introOk = (n => n >= 100 && n <= 200)(countChars(s['段落一_簡介']));
+    const excerptOk = (n => n >= 100 && n <= 300)(countChars(s['段落二_摘錄']));
+    const opinionOk = countChars(s['段落三_觀點']) >= 1000;
+    const topicsOk = (s['段落四_議題'] || '').trim().length > 10;
+
+    const card = document.createElement('div');
+    card.className = 'student-card';
+    card.onclick = () => openModal(s);
+    card.innerHTML = `
+      <div class="name">${escapeHtml(s['姓名'] || '（未命名）')}</div>
+      <div class="meta">${escapeHtml(s['班級'] || '')}｜《${escapeHtml(s['書名'] || '未填書名')}》</div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill ${p >= 100 ? 'done' : ''}" style="width:${p}%"></div></div>
+      <div class="pct-label"><span>完成度</span><span>${p}%（共 ${s['總字數'] || 0} 字）</span></div>
+      <div class="badges">
+        <span class="mini-badge ${introOk ? 'pass' : 'fail'}">簡介</span>
+        <span class="mini-badge ${excerptOk ? 'pass' : 'fail'}">摘錄</span>
+        <span class="mini-badge ${opinionOk ? 'pass' : 'fail'}">觀點</span>
+        <span class="mini-badge ${topicsOk ? 'pass' : 'fail'}">議題</span>
+      </div>
+      <div class="updated">最後更新：${formatTime(s['最後更新'])}</div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function formatTime(t) {
+  if (!t) return '—';
+  const d = new Date(t);
+  if (isNaN(d)) return '—';
+  return d.toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function openModal(s) {
+  document.getElementById('modalName').textContent = (s['姓名'] || '（未命名）') + '　' + (s['班級'] || '');
+  document.getElementById('modalMeta').textContent = `《${s['書名'] || '未填書名'}》 作者：${s['作者'] || '—'}　最後更新：${formatTime(s['最後更新'])}`;
+  document.getElementById('modalIntro').textContent = s['段落一_簡介'] || '（尚未填寫）';
+  document.getElementById('modalExcerpt').textContent = s['段落二_摘錄'] || '（尚未填寫）';
+  document.getElementById('modalOpinion').textContent = s['段落三_觀點'] || '（尚未填寫）';
+  document.getElementById('modalTopics').textContent = s['段落四_議題'] || '（尚未填寫）';
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('reading_report_teacher_key');
+  if (saved) {
+    document.getElementById('keyInput').value = saved;
+    loadData();
+  }
+});
+</script>
+</body>
+</html>

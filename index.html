@@ -837,11 +837,107 @@
 </div><!-- /container -->
 
 <div id="toast">✅ 已複製到剪貼簿！</div>
+<div id="syncBadge" style="position:fixed; bottom:16px; right:16px; background:#2d3436; color:white; font-size:0.78rem; padding:6px 14px; border-radius:20px; opacity:0.85; z-index:9999;">☁️ 尚未同步</div>
 
 <script>
 // ── State ──────────────────────────────────────────────────────
 let currentStep = 1;
 const STORAGE_KEY = 'reading_report_v2';
+
+// ── 老師後台同步設定 ────────────────────────────────────────────
+// 部署 Apps Script（見 apps-script/Code.gs）後，把網頁應用程式網址貼在這裡
+const SYNC_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+
+function getStudentId() {
+  let id = localStorage.getItem('reading_report_student_id');
+  if (!id) {
+    id = 'stu_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('reading_report_student_id', id);
+  }
+  return id;
+}
+
+let syncTimer = null;
+function scheduleSyncToTeacher() {
+  if (!SYNC_URL || SYNC_URL.indexOf('PASTE_YOUR') === 0) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncToTeacher, 1500);
+}
+
+function setSyncBadge(text) {
+  const b = document.getElementById('syncBadge');
+  if (b) b.textContent = text;
+}
+
+function computeProgress() {
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const introCnt = countChars(g('intro'));
+  const excerptCnt = countChars(g('excerpt'));
+  const opinionCnt = countChars(g('opinion'));
+  const topicsVal = g('topics');
+  let passed = 0;
+  if (introCnt >= 100 && introCnt <= 200) passed++;
+  if (excerptCnt >= 100 && excerptCnt <= 300) passed++;
+  if (opinionCnt >= 1000) passed++;
+  if (topicsVal.trim().length > 10) passed++;
+  return Math.round((passed / 4) * 100);
+}
+
+function syncToTeacher() {
+  if (!SYNC_URL || SYNC_URL.indexOf('PASTE_YOUR') === 0) return;
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const name = g('f_name').trim();
+  if (!name) { setSyncBadge('☁️ 請先填寫姓名'); return; }
+
+  const snapshot = {
+    studentId: getStudentId(),
+    name: name,
+    school: g('f_school').trim(),
+    grade: g('f_grade').trim(),
+    class: g('f_class').trim(),
+    title: g('f_title').trim(),
+    author: g('f_author').trim(),
+    intro: g('intro').trim(),
+    excerpt: g('excerpt').trim(),
+    opinion: g('opinion').trim(),
+    topics: g('topics').trim(),
+    totalCount: countChars(g('intro')) + countChars(g('excerpt')) + countChars(g('opinion')) + countChars(g('topics')),
+    progress: computeProgress()
+  };
+
+  setSyncBadge('☁️ 同步中…');
+  fetch(SYNC_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(snapshot)
+  }).then(() => {
+    setSyncBadge('☁️ 已同步 ' + new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }));
+  }).catch(() => {
+    setSyncBadge('⚠️ 同步失敗，將自動重試');
+  });
+}
+
+window.addEventListener('beforeunload', () => {
+  if (!SYNC_URL || SYNC_URL.indexOf('PASTE_YOUR') === 0) return;
+  const g = id => (document.getElementById(id) || {}).value || '';
+  if (!g('f_name').trim()) return;
+  const snapshot = {
+    studentId: getStudentId(),
+    name: g('f_name').trim(),
+    school: g('f_school').trim(),
+    grade: g('f_grade').trim(),
+    class: g('f_class').trim(),
+    title: g('f_title').trim(),
+    author: g('f_author').trim(),
+    intro: g('intro').trim(),
+    excerpt: g('excerpt').trim(),
+    opinion: g('opinion').trim(),
+    topics: g('topics').trim(),
+    totalCount: countChars(g('intro')) + countChars(g('excerpt')) + countChars(g('opinion')) + countChars(g('topics')),
+    progress: computeProgress()
+  };
+  navigator.sendBeacon(SYNC_URL, new Blob([JSON.stringify(snapshot)], { type: 'text/plain;charset=utf-8' }));
+});
 
 // ── Auto Save / Load ───────────────────────────────────────────
 function autoSave() {
@@ -854,6 +950,7 @@ function autoSave() {
   });
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
   updateAllWC();
+  scheduleSyncToTeacher();
 }
 
 function loadSaved() {
@@ -1150,6 +1247,11 @@ function showToast(msg) {
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadSaved();
+  if (!SYNC_URL || SYNC_URL.indexOf('PASTE_YOUR') === 0) {
+    setSyncBadge('☁️ 老師同步未啟用');
+  } else {
+    setSyncBadge('☁️ 尚未同步');
+  }
 });
 </script>
 </body>
