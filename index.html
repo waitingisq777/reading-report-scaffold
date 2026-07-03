@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>閱讀心得寫作鷹架系統｜中學生網站比賽版</title>
+<style>
+  :root {
+    --primary: #2c5f8a;
+    --primary-light: #4a90c4;
+    --accent: #e8a020;
+    --accent-light: #fdf3e0;
+    --success: #2d7a4f;
+    --success-light: #eaf5ee;
+    --danger: #c0392b;
+    --danger-light: #fdf0ef;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #2d3436;
+    --muted: #636e72;
+    --border: #dfe6e9;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Microsoft JhengHei', '微軟正黑體', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #1a3d5c 100%);
+    color: white;
+    text-align: center;
+    padding: 32px 20px 28px;
+  }
+  header h1 { font-size: 1.8rem; letter-spacing: 1px; margin-bottom: 6px; }
+  header p { opacity: 0.85; font-size: 0.95rem; }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #1a1a1a;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Step Nav ── */
+  .step-nav {
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .step-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: inherit;
+  }
+  .step-btn .num {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--border);
+    color: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    transition: all 0.2s;
+  }
+  .step-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+  .step-btn.active .num {
+    background: var(--primary);
+    color: white;
+  }
+  .step-btn.done .num {
+    background: var(--success);
+    color: white;
+  }
+  .step-btn.done { color: var(--success); }
+
+  /* ── Container ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+
+  /* ── Section Panel ── */
+  .panel {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+  .panel-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--bg);
+  }
+  .panel-title .icon { font-size: 1.3rem; }
+
+  /* ── Tips Box ── */
+  .tips-box {
+    background: #eef5fb;
+    border-left: 4px solid var(--primary-light);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 14px;
+    margin-bottom: 12px;
+    font-size: 0.86rem;
+    color: #1a3d5c;
+    line-height: 1.65;
+  }
+  .tips-box strong { color: var(--primary); }
+
+  /* ── Sentence Starters ── */
+  .starters-box {
+    background: var(--accent-light);
+    border: 1px dashed #d4890a;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    font-size: 0.87rem;
+  }
+  .starters-box strong { color: #8b5e0a; display: block; margin-bottom: 8px; }
+  .starter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip {
+    background: white;
+    border: 1px solid #d4890a;
+    color: #7a4f00;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .chip:hover { background: var(--accent); color: white; border-color: var(--accent); }
+  .chip:active { transform: scale(0.96); }
+
+  /* ── Form Elements ── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  label { font-size: 0.88rem; font-weight: 600; color: var(--muted); }
+  label span.req { color: var(--danger); margin-left: 2px; }
+
+  input[type="text"], input[type="number"], select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.93rem;
+    font-family: inherit;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(74,144,196,0.15);
+  }
+  textarea { resize: vertical; line-height: 1.8; }
+
+  /* ── Word Count ── */
+  .word-counter {
+    text-align: right;
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .word-counter .count { font-weight: 700; }
+  .word-counter.ok .count { color: var(--success); }
+  .word-counter.warn .count { color: var(--danger); }
+  .word-counter .req-label { color: var(--muted); }
+
+  /* ── Progress Bar ── */
+  .progress-wrap { margin-bottom: 8px; }
+  .progress-bar-bg {
+    background: var(--border);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--primary-light), var(--primary));
+    transition: width 0.3s;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.93rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: #1a3d5c; }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { background: #1e5c39; }
+  .btn-outline {
+    background: white;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+  }
+  .btn-outline:hover { background: #eef5fb; }
+  .btn-accent { background: var(--accent); color: #1a1a1a; }
+  .btn-accent:hover { background: #d4890a; color: white; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { background: #a93226; }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    justify-content: flex-end;
+  }
+
+  /* ── Validation ── */
+  .invalid { border-color: var(--danger) !important; }
+  .valid { border-color: var(--success) !important; }
+  .field-error { font-size: 0.8rem; color: var(--danger); margin-top: 4px; }
+
+  /* ── Step Sections ── */
+  .step-section { display: none; }
+  .step-section.active { display: block; }
+
+  /* ── Writing Section Cards ── */
+  .writing-section {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .writing-section-header {
+    background: linear-gradient(90deg, #eef5fb, #f8fbfe);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1.5px solid var(--border);
+  }
+  .writing-section-header h3 {
+    font-size: 0.98rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .writing-section-header .badge-req {
+    font-size: 0.75rem;
+    background: var(--primary);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .writing-section-body { padding: 18px; }
+
+  /* ── Toggle Tips ── */
+  .toggle-btn {
+    font-size: 0.8rem;
+    color: var(--primary-light);
+    cursor: pointer;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: inherit;
+    padding: 0;
+  }
+  .toggle-btn:hover { text-decoration: underline; }
+  .collapsible { display: block; }
+  .collapsible.collapsed { display: none; }
+
+  /* ── Writing Guide Banner ── */
+  .guide-banner {
+    background: #f0f7ff;
+    border: 1.5px solid #b3d4f5;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+    color: #1a3d5c;
+    line-height: 1.75;
+  }
+  .guide-banner .guide-label {
+    font-weight: 700;
+    color: var(--primary);
+  }
+  .guide-banner .guide-req {
+    display: inline-block;
+    margin-top: 4px;
+    background: var(--primary);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── Preview ── */
+  .preview-box {
+    background: white;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 28px 32px;
+    font-size: 0.95rem;
+    line-height: 2;
+    white-space: pre-wrap;
+    font-family: 'Microsoft JhengHei', sans-serif;
+    color: #1a1a1a;
+    min-height: 300px;
+  }
+  .preview-section-title {
+    font-weight: 700;
+    color: var(--primary);
+    display: block;
+    margin-top: 20px;
+    margin-bottom: 4px;
+    font-size: 1rem;
+  }
+  .preview-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 16px 0;
+  }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    padding: 8px 12px;
+    margin-bottom: 6px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .checklist li.pass { background: var(--success-light); color: var(--success); }
+  .checklist li.fail { background: var(--danger-light); color: var(--danger); }
+  .checklist li .icon { flex-shrink: 0; font-size: 1rem; }
+
+  /* ── AI Section ── */
+  .ai-warning {
+    background: #fff8e1;
+    border: 2px solid #f0b429;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 20px;
+    font-size: 0.88rem;
+    color: #7a5800;
+  }
+  .ai-warning strong { display: block; font-size: 0.95rem; margin-bottom: 6px; color: #5c4000; }
+  .ai-output {
+    background: #f8f9fa;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 18px;
+    font-size: 0.9rem;
+    line-height: 1.9;
+    min-height: 120px;
+    white-space: pre-wrap;
+  }
+  .prompt-display {
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: monospace;
+    font-size: 0.82rem;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    margin-bottom: 12px;
+  }
+
+  /* ── Copy Toast ── */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #2d3436;
+    color: white;
+    padding: 10px 22px;
+    border-radius: 25px;
+    font-size: 0.88rem;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 9999;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .panel { padding: 18px; }
+    header h1 { font-size: 1.4rem; }
+    .preview-box { padding: 18px; }
+    .step-btn { padding: 12px 12px; font-size: 0.8rem; }
+  }
+
+  /* ── Scroll indicator ── */
+  .section-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    font-size: 0.82rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* highlight example */
+  .example-block {
+    background: #f0f4ff;
+    border-left: 3px solid #7b9fd4;
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: 0.86rem;
+    color: #2c3e6b;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📖 閱讀心得寫作鷹架系統</h1>
+  <p>高中生版・逐步引導・四步完成</p>
+  <span class="badge">依據台灣中學生網站閱讀心得寫作比賽格式設計</span>
+</header>
+
+<!-- Step Navigation -->
+<nav class="step-nav" id="stepNav">
+  <button class="step-btn active" onclick="goStep(1)" id="nav-1">
+    <span class="num">1</span> 基本資料
+  </button>
+  <button class="step-btn" onclick="goStep(2)" id="nav-2">
+    <span class="num">2</span> 內容撰寫
+  </button>
+  <button class="step-btn" onclick="goStep(3)" id="nav-3">
+    <span class="num">3</span> 預覽複製
+  </button>
+  <button class="step-btn" onclick="goStep(4)" id="nav-4">
+    <span class="num">4</span> AI 輔助
+  </button>
+</nav>
+
+<div class="container">
+
+  <!-- ═══════════════════════════════════════════
+       STEP 1: 基本資料
+  ═══════════════════════════════════════════ -->
+  <div class="step-section active" id="step1">
+    <div class="panel">
+      <div class="panel-title">
+        <span class="icon">📋</span> 第一步：填寫基本資料
+      </div>
+
+      <div class="tips-box">
+        <strong>📌 填寫說明</strong>
+        <ul>
+          <li>所有欄位資料將自動帶入最終作品格式。</li>
+          <li>「學校名稱」請填寫全名，例：國立彰化高工附設進修學校。</li>
+          <li>出版年份請填西元年（例：2023）。</li>
+        </ul>
+      </div>
+
+      <div class="form-grid">
+        <!-- 學生資料 -->
+        <div class="form-group">
+          <label>姓名 <span class="req">*</span></label>
+          <input type="text" id="f_name" placeholder="例：陳小明" oninput="autoSave()">
+          <span class="field-error" id="err_name"></span>
+        </div>
+        <div class="form-group">
+          <label>學校名稱 <span class="req">*</span></label>
+          <input type="text" id="f_school" placeholder="例：國立○○高級中學" oninput="autoSave()">
+          <span class="field-error" id="err_school"></span>
+        </div>
+        <div class="form-group">
+          <label>年級 <span class="req">*</span></label>
+          <select id="f_grade" onchange="autoSave()">
+            <option value="">請選擇</option>
+            <option>高一</option><option>高二</option><option>高三</option>
+            <option>國一</option><option>國二</option><option>國三</option>
+          </select>
+          <span class="field-error" id="err_grade"></span>
+        </div>
+        <div class="form-group">
+          <label>班級</label>
+          <input type="text" id="f_class" placeholder="例：302班" oninput="autoSave()">
+        </div>
+
+        <!-- 書籍資料 -->
+        <div class="form-group full">
+          <label>書名 <span class="req">*</span></label>
+          <input type="text" id="f_title" placeholder="例：《原子習慣》" oninput="autoSave()">
+          <span class="field-error" id="err_title"></span>
+        </div>
+        <div class="form-group">
+          <label>作者 <span class="req">*</span></label>
+          <input type="text" id="f_author" placeholder="例：詹姆斯・克利爾" oninput="autoSave()">
+          <span class="field-error" id="err_author"></span>
+        </div>
+        <div class="form-group">
+          <label>譯者（若有）</label>
+          <input type="text" id="f_translator" placeholder="例：劉裕民" oninput="autoSave()">
+        </div>
+        <div class="form-group">
+          <label>出版社 <span class="req">*</span></label>
+          <input type="text" id="f_publisher" placeholder="例：先覺出版" oninput="autoSave()">
+          <span class="field-error" id="err_publisher"></span>
+        </div>
+        <div class="form-group">
+          <label>出版年份</label>
+          <input type="number" id="f_year" placeholder="例：2022" min="1900" max="2099" oninput="autoSave()">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goStep(2)">下一步：開始撰寫 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 2: 內容撰寫
+  ═══════════════════════════════════════════ -->
+  <div class="step-section" id="step2">
+
+    <!-- 總進度 -->
+    <div class="panel" style="padding:18px 28px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <span style="font-size:0.88rem; font-weight:700; color:var(--muted);">整體字數進度</span>
+        <span id="total-wc" style="font-size:0.88rem; font-weight:700; color:var(--primary);">0 / 建議 1200+ 字</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="total-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- 一、圖書作者與內容簡介 -->
+    <div class="writing-section">
+      <div class="writing-section-header">
+        <h3><span class="section-num">一</span> 圖書作者與內容簡介</h3>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge-req">100–200 字</span>
+          <button class="toggle-btn" onclick="toggleCollapse('tips1', this)">💡 收起提示</button>
+        </div>
+      </div>
+      <div class="writing-section-body">
+        <!-- 固定顯示的寫作引導 -->
+        <div class="guide-banner">
+          <span class="guide-label">寫作引導：</span>請簡要介紹書籍的作者，並概述故事大意或本書探討的核心議題。此段不列入抄襲比對。<br>
+          <span class="guide-req">格式要求：中文 100–200 字</span>
+        </div>
+        <div class="collapsible" id="tips1">
+          <div class="tips-box">
+            📌 介紹<strong>作者背景</strong>（國籍、時代、代表作）・概述<strong>主要情節或核心議題</strong>・此段<strong>不列入抄襲比對</strong>，可整合參考資料後以自己的話呈現，避免逐字翻譯書皮介紹。
+          </div>
+          <div class="starters-box">
+            <strong>✏️ 句型鷹架（點擊可插入文字框）</strong>
+            <div class="starter-chips">
+              <span class="chip" onclick="insertStarter('intro', '本書作者___，是___（國籍）的知名___作家，以___著稱。')">作者介紹</span>
+              <span class="chip" onclick="insertStarter('intro', '本書出版於___年，是___的重要作品之一。')">出版背景</span>
+              <span class="chip" onclick="insertStarter('intro', '書中主要描述___（主角）在___（場景）中，經歷___的故事。')">故事大意</span>
+              <span class="chip" onclick="insertStarter('intro', '全書圍繞著「___」這個核心議題展開，探討___。')">核心議題</span>
+              <span class="chip" onclick="insertStarter('intro', '此書共分___章，以___的敘事方式呈現___。')">結構說明</span>
+            </div>
+          </div>
+        </div>
+        <textarea id="intro" rows="7" placeholder="請在此撰寫作者與內容簡介（100–200字）……&#10;&#10;例：本書作者詹姆斯・克利爾，是美國知名習慣研究者與作家，長期深耕行為科學與自我成長領域。《原子習慣》出版於 2018 年，全球銷售逾千萬冊。書中提出「習慣堆疊」、「兩分鐘法則」等實用方法，以科學為基礎，說明微小習慣的持續累積如何帶來驚人改變，核心論點在於：成功來自系統，而非單靠目標……" oninput="updateWC('intro', 100, 200, 'wc1')"></textarea>
+        <div class="word-counter" id="wc1">
+          <span class="req-label">字數要求：100–200 字｜目前：</span><span class="count">0</span> 字
+        </div>
+      </div>
+    </div>
+
+    <!-- 二、內容摘錄 -->
+    <div class="writing-section">
+      <div class="writing-section-header">
+        <h3><span class="section-num">二</span> 內容摘錄</h3>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge-req">100–300 字</span>
+          <button class="toggle-btn" onclick="toggleCollapse('tips2', this)">💡 收起提示</button>
+        </div>
+      </div>
+      <div class="writing-section-body">
+        <div class="collapsible" id="tips2">
+          <div class="tips-box">
+            📌 摘錄<strong>最觸動您</strong>或<strong>最能代表本書精神</strong>的段落・段落後方必須標明 <strong>(p.頁碼)</strong>，例：(p.42)・可摘錄一到兩段，總字數需在範圍內・詩歌或對白請保留原有排版。
+          </div>
+          <div class="example-block">
+            <strong>範例格式：</strong><br>
+            「你不需要成為行為改變的受害者。你可以成為它的建築師。」(p.42)<br><br>
+            「每個行動都是你想成為那種人的一票。」(p.38)
+          </div>
+          <div class="starters-box">
+            <strong>✏️ 句型鷹架（點擊插入游標位置）</strong>
+            <div class="starter-chips">
+              <span class="chip" onclick="insertStarter('excerpt', '「___。」(p.___)')">引用格式</span>
+              <span class="chip" onclick="insertStarter('excerpt', '書中令我印象最深刻的一段話是：「___」(p.___)，……')">最深刻段落</span>
+              <span class="chip" onclick="insertStarter('excerpt', '作者在第___章寫道：「___」(p.___)，充分展現了___的主題。')">章節引用</span>
+              <span class="chip" onclick="insertStarter('excerpt', '這段描述讓我感受到___：「___」(p.___)。')">感受引用</span>
+            </div>
+          </div>
+        </div>
+        <textarea id="excerpt" rows="8" placeholder="請在此摘錄書中段落，並於段落後標明頁碼 (p.頁碼)……&#10;&#10;例：&#10;書中最觸動我的段落是：&#10;「習慣是自我改善的複利。就如同金錢透過複利倍增，你的習慣效果也會隨著你一再重複而倍增。」(p.17)&#10;&#10;這段話讓我意識到，改變不需要驚天動地，每天進步 1%，一年後的自己將會截然不同……" oninput="updateWC('excerpt', 100, 300, 'wc2')"></textarea>
+        <div class="word-counter" id="wc2">
+          <span class="req-label">字數要求：100–300 字｜目前：</span><span class="count">0</span> 字
+        </div>
+      </div>
+    </div>
+
+    <!-- 三、我的觀點 -->
+    <div class="writing-section">
+      <div class="writing-section-header">
+        <h3><span class="section-num">三</span> 我的觀點</h3>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge-req">1000 字以上</span>
+          <button class="toggle-btn" onclick="toggleCollapse('tips3', this)">💡 收起提示</button>
+        </div>
+      </div>
+      <div class="writing-section-body">
+        <div class="collapsible" id="tips3">
+          <div class="tips-box">
+            📌 <strong>評分關鍵！</strong> 可從以下方向發展：🔗 連結個人經驗・🌍 對比社會現況・💡 提出獨到見解・🔄 與其他書影對照・<strong>避免只是複述情節</strong>，每段都要有個人觀點・引用書中文字（50字內）請加「」引號。
+          </div>
+          <div class="starters-box">
+            <strong>✏️ 句型鷹架（點擊插入游標位置）</strong>
+            <div class="starter-chips">
+              <span class="chip" onclick="insertStarter('opinion', '讀完此書，我深刻體會到___。這讓我聯想到___。')">開場連結</span>
+              <span class="chip" onclick="insertStarter('opinion', '書中「___」一語，讓我重新思考___。在現代社會中，___。')">引用延伸</span>
+              <span class="chip" onclick="insertStarter('opinion', '在我的親身經歷中，___，這與書中___的處境不謀而合。')">個人經驗</span>
+              <span class="chip" onclick="insertStarter('opinion', '反觀當下社會，___的現象屢見不鮮，正如書中___所描繪的。')">社會對照</span>
+              <span class="chip" onclick="insertStarter('opinion', '然而，我也對___提出不同的看法。我認為___，因為___。')">批判思考</span>
+              <span class="chip" onclick="insertStarter('opinion', '作者透過___的象徵，傳達了___的深層意涵，令我___。')">象徵分析</span>
+              <span class="chip" onclick="insertStarter('opinion', '總結而言，這本書帶給我最大的啟發是___，它讓我未來在面對___時，將會___。')">結尾總結</span>
+              <span class="chip" onclick="insertStarter('opinion', '___在書中的轉變，呼應了___的人生課題。我認為___。')">人物分析</span>
+            </div>
+          </div>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="opinion-bar" style="width:0%"></div>
+          </div>
+        </div>
+        <textarea id="opinion" rows="18" placeholder="請在此撰寫您的個人觀點（1000字以上）……&#10;&#10;建議段落結構：&#10;第一段：讀後整體感受與核心主題切入&#10;第二段：連結個人生活或成長經驗&#10;第三段：延伸至社會現況或時代背景&#10;第四段：深化分析或批判性思考&#10;第五段：總結與未來展望" oninput="updateWC('opinion', 1000, 99999, 'wc3')"></textarea>
+        <div class="word-counter" id="wc3">
+          <span class="req-label">字數要求：1000 字以上｜目前：</span><span class="count">0</span> 字
+        </div>
+      </div>
+    </div>
+
+    <!-- 四、討論議題 -->
+    <div class="writing-section">
+      <div class="writing-section-header">
+        <h3><span class="section-num">四</span> 討論議題</h3>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge-req">至少一題</span>
+          <button class="toggle-btn" onclick="toggleCollapse('tips4', this)">💡 收起提示</button>
+        </div>
+      </div>
+      <div class="writing-section-body">
+        <div class="collapsible" id="tips4">
+          <div class="tips-box">
+            📌 從書中內容<strong>延伸</strong>，設計<strong>開放性、具深度</strong>的討論問題，應能引發多元觀點・<strong>避免</strong>是非題或簡單問答・可提出 1–3 個議題，條列呈現。
+          </div>
+          <div class="example-block">
+            <strong>優質議題範例：</strong><br>
+            1. 書中強調「身分認同」是改變習慣的根本，要先相信自己是某種人，才能持續做出對應的行為。然而，若一個人長期處於低自我效能感的環境中，這樣的思維方式是否依然適用？<br><br>
+            2. 作者認為環境設計比意志力更有效。在升學壓力龐大的高中生活中，你認為可以如何重新設計自己的學習環境，幫助建立良好習慣？
+          </div>
+          <div class="starters-box">
+            <strong>✏️ 句型鷹架（點擊插入游標位置）</strong>
+            <div class="starter-chips">
+              <span class="chip" onclick="insertStarter('topics', '1. 書中___的觀念，在當代社會是否仍然適用？面對___的情況，你認為最理想的做法是什麼？')">社會應用</span>
+              <span class="chip" onclick="insertStarter('topics', '2. 若你是___（角色），面對___的選擇，你會如何抉擇？這樣的選擇可能帶來什麼影響？')">角色換位</span>
+              <span class="chip" onclick="insertStarter('topics', '3. 書中提到「___」，你認為在___的情境下，這樣的觀點有哪些優點與限制？')">多元觀點</span>
+              <span class="chip" onclick="insertStarter('topics', '4. 作者透過___的意象，批判了___。你認為現今社會中，是否仍存在類似的問題？')">社會批判</span>
+            </div>
+          </div>
+        </div>
+        <textarea id="topics" rows="6" placeholder="請在此撰寫討論議題（至少一個）……&#10;&#10;1. （請設計開放性問題，避免是非題）&#10;&#10;2. （可選填）" oninput="autoSave()"></textarea>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(1)">← 返回修改</button>
+      <button class="btn btn-primary" onclick="validateStep2()">下一步：預覽作品 →</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 3: 預覽與複製
+  ═══════════════════════════════════════════ -->
+  <div class="step-section" id="step3">
+    <div class="panel">
+      <div class="panel-title">
+        <span class="icon">👁️</span> 第三步：預覽與複製
+      </div>
+
+      <!-- 格式檢查清單 -->
+      <div style="margin-bottom:20px;">
+        <div style="font-weight:700; font-size:0.92rem; margin-bottom:10px; color:var(--text);">📋 格式自動檢查</div>
+        <ul class="checklist" id="checklist"></ul>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <span style="font-size:0.9rem; font-weight:700; color:var(--muted);">最終預覽（上傳至中學生網站的格式）</span>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline" onclick="copyPreview()" style="font-size:0.85rem; padding:8px 16px;">📋 複製全文</button>
+          <button class="btn btn-success" onclick="copyPreview()" style="font-size:0.85rem; padding:8px 16px;">⬇️ 複製並貼上</button>
+        </div>
+      </div>
+      <div class="preview-box" id="previewBox"></div>
+      <div style="margin-top:16px; font-size:0.82rem; color:var(--muted); line-height:1.6;">
+        ⚠️ 請確認：段落間是否空一行？標點符號是否正確？書名號《》是否完整？頁碼標示 (p.頁碼) 格式是否正確？
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep(2)">← 返回修改</button>
+        <button class="btn btn-accent" onclick="goStep(4)">前往 AI 輔助校對 →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       STEP 4: AI 輔助
+  ═══════════════════════════════════════════ -->
+  <div class="step-section" id="step4">
+    <div class="panel">
+      <div class="panel-title">
+        <span class="icon">🤖</span> 第四步：AI 寫作輔助
+      </div>
+
+      <div class="ai-warning">
+        <strong>⚠️ 重要使用說明與倫理提醒</strong>
+        根據 114 學年度中學生網站閱讀心得寫作比賽簡章規定，<strong>參賽作品不得使用任何 AI 工具輔助生成文章內容</strong>。<br><br>
+        本功能僅供<strong>自我學習與修正</strong>之用，幫助您理解語法錯誤、提升表達能力。<br>
+        <strong>請務必：</strong>
+        <ul style="margin-top:8px; padding-left:18px; line-height:2;">
+          <li>理解 AI 提出的每一條建議背後的原因</li>
+          <li>用自己的話重新表達，而非直接複製貼上 AI 建議</li>
+          <li>直接複製 AI 建議可能導致違反比賽規定，後果自負</li>
+        </ul>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-weight:700; margin-bottom:12px;">選擇 AI 校對項目：</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9rem;">
+            <input type="checkbox" id="ai_format" checked> 格式與段落結構
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9rem;">
+            <input type="checkbox" id="ai_grammar" checked> 文法與標點符號
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9rem;">
+            <input type="checkbox" id="ai_depth"> 論點深度建議
+          </label>
+          <label style="display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.9rem;">
+            <input type="checkbox" id="ai_flow"> 段落銜接與邏輯流暢性
+          </label>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <div style="font-weight:700; margin-bottom:8px; font-size:0.9rem; color:var(--muted);">📤 複製以下 Prompt，貼至 Claude、ChatGPT 等 AI 工具：</div>
+        <div class="prompt-display" id="aiPrompt"></div>
+        <button class="btn btn-outline" onclick="copyPrompt()" style="margin-top:8px; font-size:0.85rem; padding:8px 16px;">📋 複製 Prompt</button>
+      </div>
+
+      <div style="font-size:0.85rem; color:var(--muted); line-height:1.8; background:var(--bg); padding:14px 16px; border-radius:8px;">
+        <strong style="color:var(--text);">使用步驟：</strong><br>
+        1. 點擊上方「複製 Prompt」按鈕<br>
+        2. 開啟 Claude（claude.ai）或 ChatGPT（chat.openai.com）<br>
+        3. 將 Prompt 貼入對話框，發送<br>
+        4. 仔細閱讀 AI 建議，<strong>理解後用自己的文字修改</strong>，回到第二步更新內容<br>
+        5. 切勿直接複製 AI 回覆作為參賽作品
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="goStep(3)">← 返回預覽</button>
+        <button class="btn btn-primary" onclick="goStep(2)">🔙 返回修改內容</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<div id="toast">✅ 已複製到剪貼簿！</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let currentStep = 1;
+const STORAGE_KEY = 'reading_report_v2';
+
+// ── Auto Save / Load ───────────────────────────────────────────
+function autoSave() {
+  const data = {};
+  ['f_name','f_school','f_grade','f_class','f_title','f_author',
+   'f_translator','f_publisher','f_year',
+   'intro','excerpt','opinion','topics'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) data[id] = el.value;
+  });
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
+  updateAllWC();
+}
+
+function loadSaved() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.keys(data).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = data[id];
+    });
+    updateAllWC();
+  } catch(e) {}
+}
+
+// ── Word Count ─────────────────────────────────────────────────
+function countChars(str) {
+  return (str || '').replace(/\s/g, '').length;
+}
+
+function updateWC(textareaId, min, max, counterId) {
+  const el = document.getElementById(textareaId);
+  const counter = document.getElementById(counterId);
+  if (!el || !counter) return;
+  const cnt = countChars(el.value);
+  const span = counter.querySelector('.count');
+  span.textContent = cnt;
+  counter.classList.remove('ok', 'warn');
+  if (cnt >= min && cnt <= max) counter.classList.add('ok');
+  else if (cnt > 0) counter.classList.add('warn');
+
+  // opinion progress bar
+  if (textareaId === 'opinion') {
+    const pct = Math.min(100, (cnt / 1000) * 100);
+    document.getElementById('opinion-bar').style.width = pct + '%';
+  }
+  updateTotalWC();
+  autoSave();
+}
+
+function updateAllWC() {
+  updateWC('intro',   100,   200, 'wc1');
+  updateWC('excerpt', 100,   300, 'wc2');
+  updateWC('opinion', 1000, 99999,'wc3');
+  updateTotalWC();
+}
+
+function updateTotalWC() {
+  const total = ['intro','excerpt','opinion','topics'].reduce((s, id) => {
+    const el = document.getElementById(id);
+    return s + countChars(el ? el.value : '');
+  }, 0);
+  document.getElementById('total-wc').textContent = total + ' / 建議 1200+ 字';
+  const pct = Math.min(100, (total / 1200) * 100);
+  document.getElementById('total-bar').style.width = pct + '%';
+}
+
+// ── Step Navigation ────────────────────────────────────────────
+function goStep(n) {
+  document.querySelectorAll('.step-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  document.querySelectorAll('.step-btn').forEach((b, i) => {
+    b.classList.remove('active');
+    if (i + 1 < n) b.classList.add('done');
+    else b.classList.remove('done');
+  });
+  document.getElementById('nav-' + n).classList.add('active');
+  currentStep = n;
+  if (n === 3) buildPreview();
+  if (n === 4) buildAIPrompt();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Validation ─────────────────────────────────────────────────
+function setErr(id, msg) {
+  const el = document.getElementById(id);
+  const err = document.getElementById('err_' + id.replace('f_',''));
+  if (el) el.classList.toggle('invalid', !!msg);
+  if (err) err.textContent = msg || '';
+}
+
+
+function validateStep2() {
+  goStep(3);
+}
+
+// ── Collapsible ────────────────────────────────────────────────
+function toggleCollapse(id, btn) {
+  const el = document.getElementById(id);
+  const collapsed = el.classList.toggle('collapsed');
+  if (btn) btn.textContent = collapsed ? '💡 顯示提示' : '💡 收起提示';
+}
+
+// ── Insert Starter ─────────────────────────────────────────────
+function insertStarter(textareaId, text) {
+  const ta = document.getElementById(textareaId);
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  const val   = ta.value;
+  ta.value = val.substring(0, start) + text + val.substring(end);
+  ta.selectionStart = ta.selectionEnd = start + text.length;
+  ta.focus();
+  updateAllWC();
+}
+
+// ── Build Preview ──────────────────────────────────────────────
+function buildPreview() {
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const name      = g('f_name').trim();
+  const school    = g('f_school').trim();
+  const grade     = g('f_grade').trim();
+  const cls       = g('f_class').trim();
+  const bookTitle = g('f_title').trim();
+  const author    = g('f_author').trim();
+  const trans     = g('f_translator').trim();
+  const pub       = g('f_publisher').trim();
+  const year      = g('f_year').trim();
+  const intro     = g('intro').trim();
+  const excerpt   = g('excerpt').trim();
+  const opinion   = g('opinion').trim();
+  const topics    = g('topics').trim();
+
+  const transLine = trans ? `　譯者：${trans}` : '';
+  const yearLine  = year  ? `　出版年份：${year} 年` : '';
+
+  const preview = document.getElementById('previewBox');
+  preview.innerHTML = '';
+
+  const addLine = (text, cls_name) => {
+    const div = document.createElement('div');
+    if (cls_name === 'title') {
+      div.style.cssText = 'text-align:center; font-size:1.15rem; font-weight:700; margin-bottom:6px;';
+    } else if (cls_name === 'meta') {
+      div.style.cssText = 'text-align:center; font-size:0.9rem; color:#555; margin-bottom:4px;';
+    } else if (cls_name === 'section') {
+      div.style.cssText = 'font-weight:700; color:#2c5f8a; margin:18px 0 6px; font-size:1rem;';
+    } else if (cls_name === 'divider') {
+      div.style.cssText = 'border-top:1px solid #ddd; margin:12px 0;';
+    } else {
+      div.style.cssText = 'white-space:pre-wrap; margin-bottom:10px;';
+    }
+    div.textContent = text;
+    preview.appendChild(div);
+  };
+
+  const bookInfo = `書名：${bookTitle || '—'}　作者：${author || '—'}${transLine}　出版社：${pub || '—'}${yearLine}`;
+  addLine(bookInfo, 'meta');
+  addLine(`${school || '—'} ${grade}${cls} ${name}`, 'meta');
+
+  const hr = document.createElement('hr');
+  hr.style.cssText = 'border:none; border-top:1.5px solid #ccc; margin:14px 0;';
+  preview.appendChild(hr);
+
+  if (intro) {
+    addLine('一、圖書作者與內容簡介', 'section');
+    addLine(intro);
+  }
+  if (excerpt) {
+    addLine('二、內容摘錄', 'section');
+    addLine(excerpt);
+  }
+  if (opinion) {
+    addLine('三、我的觀點', 'section');
+    addLine(opinion);
+  }
+  if (topics) {
+    addLine('四、討論議題', 'section');
+    addLine(topics);
+  }
+
+  // Checklist
+  buildChecklist();
+}
+
+function buildChecklist() {
+  const g   = id => (document.getElementById(id) || {}).value || '';
+  const intro_cnt   = countChars(g('intro'));
+  const excerpt_cnt = countChars(g('excerpt'));
+  const opinion_cnt = countChars(g('opinion'));
+  const excerpt_val = g('excerpt');
+  const opinion_val = g('opinion');
+  const topics_val  = g('topics');
+
+  const items = [
+    { label: `圖書作者與內容簡介：${intro_cnt} 字（要求 100–200 字）`,   pass: intro_cnt >= 100 && intro_cnt <= 200 },
+    { label: `內容摘錄：${excerpt_cnt} 字（要求 100–300 字）`,           pass: excerpt_cnt >= 100 && excerpt_cnt <= 300 },
+    { label: `內容摘錄包含頁碼標示 (p.xx)`,                              pass: /\(p\.\d+\)/.test(excerpt_val) },
+    { label: `我的觀點：${opinion_cnt} 字（要求 1000 字以上）`,          pass: opinion_cnt >= 1000 },
+    { label: `我的觀點中引用文字已加上「」引號`,                          pass: opinion_val.includes('「') || opinion_cnt < 10 },
+    { label: `討論議題已填寫且為開放式問題`,                              pass: topics_val.length > 10 },
+    { label: `書名、作者、出版社等基本資料完整`,                          pass: !!(g('f_title') && g('f_author') && g('f_publisher')) },
+  ];
+
+  const ul = document.getElementById('checklist');
+  ul.innerHTML = '';
+  items.forEach(item => {
+    const li = document.createElement('li');
+    li.className = item.pass ? 'pass' : 'fail';
+    li.innerHTML = `<span class="icon">${item.pass ? '✅' : '❌'}</span>${item.label}`;
+    ul.appendChild(li);
+  });
+}
+
+// ── Copy Preview ───────────────────────────────────────────────
+function copyPreview() {
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const name      = g('f_name').trim();
+  const school    = g('f_school').trim();
+  const grade     = g('f_grade').trim();
+  const cls       = g('f_class').trim();
+  const bookTitle = g('f_title').trim();
+  const author    = g('f_author').trim();
+  const trans     = g('f_translator').trim();
+  const pub       = g('f_publisher').trim();
+  const year      = g('f_year').trim();
+
+  const transLine = trans ? `　譯者：${trans}` : '';
+  const yearLine  = year  ? `　出版年份：${year} 年` : '';
+
+  const text = [
+    `書名：${bookTitle}　作者：${author}${transLine}　出版社：${pub}${yearLine}`,
+    `${school} ${grade}${cls} ${name}`,
+    '',
+    '一、圖書作者與內容簡介',
+    g('intro').trim(),
+    '',
+    '二、內容摘錄',
+    g('excerpt').trim(),
+    '',
+    '三、我的觀點',
+    g('opinion').trim(),
+    '',
+    '四、討論議題',
+    g('topics').trim(),
+  ].join('\n');
+
+  navigator.clipboard.writeText(text).then(() => showToast('✅ 已複製到剪貼簿！'));
+}
+
+// ── Build AI Prompt ────────────────────────────────────────────
+function buildAIPrompt() {
+  const g = id => (document.getElementById(id) || {}).value || '';
+  const tasks = [];
+  if (document.getElementById('ai_format').checked)  tasks.push('1. 格式與段落結構：確認各段落標題是否正確、內容是否符合格式要求');
+  if (document.getElementById('ai_grammar').checked)  tasks.push('2. 文法與標點符號：找出錯別字、標點誤用、語句不通順之處，請以條列方式列出，不要直接改寫全文');
+  if (document.getElementById('ai_depth').checked)    tasks.push('3. 論點深度：針對「我的觀點」段落，請分析哪些論點較薄弱，並提示可以從哪個方向加強，但不要代替我寫');
+  if (document.getElementById('ai_flow').checked)     tasks.push('4. 段落銜接：找出段落之間邏輯跳躍或銜接不順暢之處，請指出問題位置');
+
+  const prompt = `你是一位繁體中文寫作輔導老師，請協助我校對以下這篇閱讀心得。
+
+【重要說明】
+這是一篇準備參加台灣中學生網站閱讀心得寫作比賽的文章。
+請不要代我重寫或改寫文章內容，只需提出具體的修改建議，讓我能自己修改。
+
+【請協助檢查以下項目】
+${tasks.join('\n') || '格式與標點符號'}
+
+【閱讀心得全文】
+========================================
+書名：${g('f_title')}
+作者：${g('f_author')}
+
+一、圖書作者與內容簡介
+${g('intro').trim()}
+
+二、內容摘錄
+${g('excerpt').trim()}
+
+三、我的觀點
+${g('opinion').trim()}
+
+四、討論議題
+${g('topics').trim()}
+========================================
+
+請以條列式呈現您的建議，並說明每條建議的理由，讓我能充分理解後自行修改。`;
+
+  document.getElementById('aiPrompt').textContent = prompt;
+}
+
+function copyPrompt() {
+  const text = document.getElementById('aiPrompt').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('✅ Prompt 已複製！'));
+}
+
+// ── Toast ──────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── Init ───────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadSaved();
+});
+</script>
+</body>
+</html>
