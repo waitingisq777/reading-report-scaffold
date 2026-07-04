@@ -850,47 +850,16 @@
   </div>
 </div>
 
-<!-- ── 老師後台同步：Firebase（免寫後端程式碼）──────────────────────
-     設定步驟請見 FIREBASE_SETUP.md。
-     完成 Firebase 專案設定後，把下方 firebaseConfig 換成您自己的設定值即可。 -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "PASTE_YOUR_API_KEY",
-    authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
-    projectId: "PASTE_YOUR_PROJECT",
-    storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
-    messagingSenderId: "PASTE_YOUR_SENDER_ID",
-    appId: "PASTE_YOUR_APP_ID"
-  };
-
-  const FIREBASE_ENABLED = firebaseConfig.apiKey.indexOf('PASTE_YOUR') !== 0;
-  window.__fbEnabled = FIREBASE_ENABLED;
-
-  if (FIREBASE_ENABLED) {
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // 匿名登入僅用來取得寫入權限（Firestore 規則要求 request.auth != null），
-    // 實際用來識別學生身分、決定雲端文件位置的是「姓名登入」輸入的姓名（見下方 classic script）。
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.__fbReady = true;
-        window.dispatchEvent(new Event('fb-ready'));
-      }
-    });
-    signInAnonymously(auth).catch(() => window.__setSyncBadge && window.__setSyncBadge('⚠️ 連線失敗'));
-
-    window.__fbSync = async (snapshot, studentId) => {
-      if (!studentId) return false;
-      await setDoc(doc(db, 'reports', studentId), { ...snapshot, studentId, updatedAt: serverTimestamp() }, { merge: true });
-      return true;
-    };
-  }
+<!-- ── 老師後台同步：Google Apps Script + 試算表 ──────────────────────
+     設定步驟：
+     1. 開一個 Google 試算表 →「擴充功能」→「Apps Script」
+     2. 把 apps-script/Code.gs 的內容整段貼進去，取代預設內容
+     3. 「指令碼屬性」新增一筆 TEACHER_KEY（自訂密碼）
+     4. 「部署」→「新增部署作業」→ 類型「網頁應用程式」，執行身分「我」，誰可以存取「所有人」
+     5. 把部署後的網址（結尾 /exec）換掉下方 SYNC_URL，同時貼到 teacher-dashboard.html -->
+<script>
+  const SYNC_URL = 'PASTE_YOUR_APPS_SCRIPT_URL';
+  window.__asEnabled = SYNC_URL.indexOf('PASTE_YOUR') !== 0;
 </script>
 
 <script>
@@ -934,10 +903,10 @@ function changeName() {
   }
 }
 
-// ── 老師後台同步（Firebase）────────────────────────────────────
+// ── 老師後台同步（Apps Script）───────────────────────────────────
 let syncTimer = null;
 function scheduleSyncToTeacher() {
-  if (!window.__fbEnabled) return;
+  if (!window.__asEnabled) return;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(syncToTeacher, 1500);
 }
@@ -981,23 +950,30 @@ function buildSnapshot() {
 }
 
 async function syncToTeacher() {
-  if (!window.__fbEnabled) return;
+  if (!window.__asEnabled) return;
   const studentId = getStudentId();
   if (!studentId) { setSyncBadge('☁️ 請先登入姓名'); return; }
   const snapshot = buildSnapshot();
-  if (!window.__fbReady) {
-    setSyncBadge('☁️ 連線中…');
-    window.addEventListener('fb-ready', syncToTeacher, { once: true });
-    return;
-  }
   setSyncBadge('☁️ 同步中…');
   try {
-    await window.__fbSync(snapshot, studentId);
+    await fetch(SYNC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ ...snapshot, studentId })
+    });
     setSyncBadge('☁️ 已同步 ' + new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }));
   } catch (e) {
     setSyncBadge('⚠️ 同步失敗，將自動重試');
   }
 }
+
+window.addEventListener('beforeunload', () => {
+  if (!window.__asEnabled) return;
+  const studentId = getStudentId();
+  if (!studentId) return;
+  const snapshot = buildSnapshot();
+  navigator.sendBeacon(SYNC_URL, new Blob([JSON.stringify({ ...snapshot, studentId })], { type: 'text/plain;charset=utf-8' }));
+});
 
 // ── Auto Save / Load ───────────────────────────────────────────
 function autoSave() {
@@ -1308,7 +1284,7 @@ function showToast(msg) {
 // ── Init ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   loadSaved();
-  setSyncBadge(window.__fbEnabled ? '☁️ 尚未同步' : '☁️ 老師同步未啟用');
+  setSyncBadge(window.__asEnabled ? '☁️ 尚未同步' : '☁️ 老師同步未啟用');
 
   const savedName = localStorage.getItem(LOGIN_KEY);
   if (savedName) {
